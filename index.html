@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cluedo: Game of Thrones — Detection Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Cinzel+Decorative:wght@700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=EB+Garamond:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0a0908;
+    --gold:#c9a86a;
+    --gold-bright:#e6c878;
+    --blood:#7a1f2b;
+    --blood-dark:#591620;
+    --wood-shadow:#2b2521;
+    --parchment:#e8dcc4;
+    --parchment-dim:#d8c9a8;
+    --green:#1e3d2f;
+    --line:#a98f5c;
+  }
+
+  html{
+    -webkit-text-size-adjust:100%;
+    -moz-text-size-adjust:100%;
+    text-size-adjust:100%;
+  }
+
+  *{box-sizing:border-box;}
+
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(ellipse at top, #1c1410 0%, var(--ink) 55%),
+      repeating-linear-gradient(90deg, rgba(0,0,0,0.15) 0 2px, transparent 2px 40px);
+    background-attachment:fixed;
+    font-family:'Crimson Text', serif;
+    color:var(--parchment);
+    padding:28px 16px 80px;
+  }
+
+  /* ---------- Header ---------- */
+  .crown{
+    text-align:center;
+    margin-bottom:6px;
+  }
+  .crown svg{ width:46px; height:46px; opacity:0.85; }
+
+  h1{
+    font-family:'Cinzel Decorative', serif;
+    font-weight:900;
+    text-align:center;
+    font-size:clamp(28px, 5vw, 46px);
+    letter-spacing:2px;
+    margin:4px 0 2px;
+    color:var(--gold-bright);
+    text-shadow: 0 2px 0 #000, 0 0 28px rgba(201,168,106,0.35);
+  }
+  .subtitle{
+    text-align:center;
+    font-family:'Cinzel', serif;
+    font-size:13px;
+    letter-spacing:4px;
+    text-transform:uppercase;
+    color:var(--parchment-dim);
+    opacity:0.8;
+    margin-bottom:22px;
+  }
+
+  .divider{
+    width:min(560px, 90%);
+    margin:0 auto 26px;
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .divider .line{
+    flex:1;
+    height:1px;
+    background:linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+  .divider .sigil{
+    color:var(--gold);
+    font-size:18px;
+    transform:rotate(45deg);
+    opacity:0.9;
+  }
+
+  /* ---------- Controls bar ---------- */
+  .controls{
+    max-width:980px;
+    margin:0 auto 22px;
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+  }
+
+  .tabs{
+    display:flex;
+    gap:10px;
+  }
+  .tab{
+    font-family:'Cinzel', serif;
+    font-weight:700;
+    font-size:14px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    padding:10px 22px;
+    background:linear-gradient(180deg, #3a2f25, #241c16);
+    border:1px solid var(--line);
+    color:var(--parchment-dim);
+    cursor:pointer;
+    position:relative;
+    clip-path:polygon(6% 0,94% 0,100% 30%,100% 100%,0 100%,0 30%);
+    transition:all .2s ease;
+  }
+  .tab:hover{ color:var(--gold-bright); }
+  .tab.active{
+    background:linear-gradient(180deg, var(--blood), var(--blood-dark));
+    color:var(--gold-bright);
+    border-color:var(--gold);
+    box-shadow:0 0 18px rgba(122,31,43,0.55), inset 0 0 14px rgba(0,0,0,0.4);
+  }
+
+  .right-controls{
+    display:flex;
+    gap:10px;
+  }
+
+  .btn{
+    font-family:'Cinzel', serif;
+    font-weight:700;
+    font-size:13px;
+    letter-spacing:1.2px;
+    text-transform:uppercase;
+    padding:10px 18px;
+    background:linear-gradient(180deg, #2a241d, #181410);
+    border:1px solid var(--gold);
+    color:var(--gold-bright);
+    cursor:pointer;
+    border-radius:3px;
+    transition:all .2s ease;
+  }
+  .btn:hover{
+    background:linear-gradient(180deg, var(--gold), #a3823f);
+    color:#1a1410;
+    box-shadow:0 0 14px rgba(201,168,106,0.5);
+  }
+  .btn:active{ transform:translateY(1px); }
+  .btn.danger{ border-color:var(--blood); color:#e3a3ab; }
+  .btn.danger:hover{ background:linear-gradient(180deg, var(--blood), var(--blood-dark)); color:var(--parchment); }
+
+  /* ---------- Reset confirmation modal ---------- */
+  .modal-overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(5,4,3,0.78);
+    z-index:50;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+  .modal-overlay.open{ display:flex; }
+  .modal-box{
+    background:
+      linear-gradient(180deg, #2b2118, #1a130d);
+    border:1px solid var(--gold);
+    box-shadow:0 0 0 1px rgba(0,0,0,0.6), 0 20px 60px rgba(0,0,0,0.8), 0 0 30px rgba(122,31,43,0.25);
+    padding:28px 26px 24px;
+    max-width:360px;
+    width:100%;
+    text-align:center;
+    clip-path:polygon(3% 0,97% 0,100% 6%,100% 94%,97% 100%,3% 100%,0 94%,0 6%);
+  }
+  .modal-sigil{
+    color:var(--blood);
+    font-size:26px;
+    margin-bottom:10px;
+    text-shadow:0 0 14px rgba(122,31,43,0.6);
+  }
+  .modal-text{
+    font-family:'Cinzel', serif;
+    font-size:15px;
+    letter-spacing:0.5px;
+    color:var(--parchment);
+    margin:0 0 6px;
+  }
+  .modal-subtext{
+    font-family:'EB Garamond', serif;
+    font-style:italic;
+    font-size:13px;
+    color:var(--parchment-dim);
+    opacity:0.75;
+    margin:0 0 20px;
+  }
+  .modal-actions{
+    display:flex;
+    gap:10px;
+    justify-content:center;
+  }
+
+  /* ---------- Players (in-table) ---------- */
+  .players-hint{
+    max-width:980px;
+    margin:0 auto 14px;
+    font-family:'Cinzel', serif;
+    font-size:11px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:var(--gold);
+    opacity:0.75;
+    text-align:center;
+  }
+  .player-input{
+    font-family:'Cinzel', serif;
+    font-weight:700;
+    font-size:12px;
+    letter-spacing:0.5px;
+    text-align:center;
+    width:100%;
+    background:transparent;
+    border:none;
+    border-bottom:2px solid rgba(10,9,8,0.45);
+    color:var(--ink);
+    padding:10px 4px;
+    outline:none;
+    transition:background .2s;
+  }
+  .player-input::placeholder{ color:rgba(10,9,8,0.45); }
+  .player-input:focus{
+    background:rgba(255,255,255,0.25);
+    border-bottom-color:var(--blood);
+  }
+
+  /* ---------- Board wrapper ---------- */
+  #boardWrap{
+    max-width:980px;
+    margin:0 auto;
+    transition:opacity .25s ease;
+  }
+
+  .board-frame{
+    background:
+      linear-gradient(180deg, rgba(232,220,196,0.04), rgba(232,220,196,0.01)),
+      var(--ink);
+    border:1px solid var(--gold);
+    box-shadow:0 0 0 1px rgba(0,0,0,0.5), 0 18px 50px rgba(0,0,0,0.6);
+    padding:4px;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  .scroll-hint{
+    display:none;
+    text-align:center;
+    font-family:'Cinzel', serif;
+    font-size:10px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:var(--gold);
+    opacity:0.7;
+    padding:6px 0 0;
+  }
+
+  table.ledger{
+    width:100%;
+    table-layout:fixed;
+    border-collapse:collapse;
+    background:
+      repeating-linear-gradient(180deg, rgba(255,255,255,0.012) 0 1px, transparent 1px 30px),
+      #181210;
+  }
+
+  .col-label{ width:170px; }
+  .col-player{ width:auto; }
+
+  .ledger th, .ledger td{
+    border:1px solid #3a3026;
+    padding:0;
+    text-align:center;
+  }
+
+  .corner-cell{
+    background:linear-gradient(180deg, #241b14, #14100c);
+    position:sticky;
+    left:0;
+    z-index:3;
+    font-family:'Cinzel Decorative', serif;
+    font-weight:700;
+    font-size:13px;
+    letter-spacing:1.5px;
+    color:var(--gold-bright);
+    text-shadow:0 1px 3px rgba(0,0,0,0.8), 0 0 10px rgba(201,168,106,0.25);
+    padding:10px 8px;
+  }
+
+  .cat-row th.category-label{
+    font-family:'Cinzel Decorative', serif;
+    font-weight:700;
+    font-size:15px;
+    letter-spacing:3px;
+    text-transform:uppercase;
+    color:var(--gold-bright);
+    background:linear-gradient(180deg, var(--blood), var(--blood-dark));
+    padding:10px 6px;
+    text-shadow:0 1px 2px rgba(0,0,0,0.6);
+    border-top:2px solid var(--gold);
+    border-bottom:2px solid var(--gold);
+  }
+
+  .player-header-row th{
+    font-family:'Cinzel', serif;
+    font-size:12px;
+    letter-spacing:1px;
+    color:var(--ink);
+    background:linear-gradient(180deg, var(--gold-bright), var(--gold));
+    padding:0;
+  }
+  .player-header-row th.corner-cell{
+    background:linear-gradient(180deg, #241b14, #14100c);
+    color:var(--gold-bright);
+  }
+
+  .item-row th.item-label{
+    font-family:'EB Garamond', serif;
+    font-style:italic;
+    font-size:15px;
+    text-align:left;
+    padding:9px 14px;
+    color:var(--parchment);
+    background:#221b15;
+    white-space:nowrap;
+    position:sticky;
+    left:0;
+    z-index:2;
+    box-shadow:2px 0 6px rgba(0,0,0,0.4);
+  }
+
+  .mark-cell{
+    height:48px;
+    cursor:pointer;
+    user-select:none;
+    -webkit-tap-highlight-color:transparent;
+    position:relative;
+    transition:background .15s;
+  }
+  .mark-cell:hover{ background:rgba(201,168,106,0.08); }
+  .mark-cell .glyph{
+    font-size:22px;
+    line-height:1;
+    display:inline-block;
+  }
+  .mark-cell.state-check .glyph{ color:#7fd99a; text-shadow:0 0 10px rgba(127,217,154,0.6); }
+  .mark-cell.state-cross .glyph{ color:#e3697a; text-shadow:0 0 10px rgba(227,105,122,0.55); }
+  .mark-cell.state-maybe .glyph{ color:var(--gold-bright); text-shadow:0 0 8px rgba(230,200,120,0.5); }
+
+  .mark-cell .glyph{
+    animation:stamp .18s ease-out;
+  }
+  @keyframes stamp{
+    0%{ transform:scale(0.4) rotate(-12deg); opacity:0; }
+    100%{ transform:scale(1) rotate(0deg); opacity:1; }
+  }
+
+  tr.section-gap td, tr.section-gap th{ border-top:2px solid var(--gold); }
+
+  /* hidden state */
+  .hidden-board{
+    display:none;
+  }
+  .hidden-msg{
+    text-align:center;
+    font-family:'Cinzel', serif;
+    letter-spacing:2px;
+    color:var(--parchment-dim);
+    padding:60px 20px;
+    border:1px dashed var(--gold);
+    opacity:0.7;
+  }
+
+  footer{
+    text-align:center;
+    margin-top:36px;
+    font-family:'EB Garamond', serif;
+    font-style:italic;
+    font-size:13px;
+    color:rgba(232,220,196,0.45);
+  }
+
+  @media (max-width:760px){
+    body{ padding:18px 6px 60px; }
+    .controls{ justify-content:center; }
+    .col-label{ width:60px; }
+    .corner-cell{ font-size:9.5px; padding:6px 3px; letter-spacing:0.3px; }
+    .mark-cell{ height:42px; }
+    .mark-cell .glyph{ font-size:18px; }
+    .item-row th.item-label{ font-size:12.5px; padding:7px 4px; white-space:normal; line-height:1.15; word-break:break-word; }
+    .player-input{ font-size:10px; padding:7px 1px; letter-spacing:0; }
+    .scroll-hint{ display:none; }
+  }
+
+  @media (max-width:400px){
+    .col-label{ width:50px; }
+    .corner-cell{ font-size:8.5px; }
+    .mark-cell{ height:40px; }
+    .mark-cell .glyph{ font-size:16px; }
+    .item-row th.item-label{ font-size:11.5px; padding:6px 3px; }
+    .player-input{ font-size:9px; padding:6px 1px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="crown">
+  <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M10 70 L20 30 L30 55 L40 20 L50 55 L60 20 L70 55 L80 30 L90 70 Z" stroke="#c9a86a" stroke-width="3" stroke-linejoin="round"/>
+    <circle cx="20" cy="30" r="3" fill="#c9a86a"/>
+    <circle cx="40" cy="20" r="3" fill="#c9a86a"/>
+    <circle cx="60" cy="20" r="3" fill="#c9a86a"/>
+    <circle cx="80" cy="30" r="3" fill="#c9a86a"/>
+  </svg>
+</div>
+<h1>The Detection Ledger</h1>
+<div class="subtitle">A Game of Thrones — Cluedo Tracker</div>
+
+<div class="divider"><div class="line"></div><div class="sigil">⚔</div><div class="line"></div></div>
+
+<div class="controls">
+  <div class="tabs">
+    <button class="tab active" data-board="redkeep">Red Keep</button>
+    <button class="tab" data-board="meereen">Meereen</button>
+  </div>
+  <div class="right-controls">
+    <button class="btn" id="toggleBoard">Hide Board</button>
+    <button class="btn danger" id="resetBoard">Reset Marks</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="resetOverlay">
+  <div class="modal-box">
+    <div class="modal-sigil">⚔</div>
+    <p class="modal-text" id="resetText">Clear all marks on this board?</p>
+    <p class="modal-subtext">This cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="btn" id="resetCancel">Cancel</button>
+      <button class="btn danger" id="resetConfirm">Clear Marks</button>
+    </div>
+  </div>
+</div>
+
+<div class="players-hint">Tap a name above each column to edit it</div>
+
+<div id="boardWrap">
+  <div class="board-frame">
+    <table class="ledger" id="ledgerTable"></table>
+  </div>
+  <div class="scroll-hint">⟷ scroll sideways for all players</div>
+</div>
+
+<div class="hidden-board" id="hiddenMsg">
+  <div class="hidden-msg">— the ledger has been sealed —</div>
+</div>
+
+<footer>"Knowledge is power." Mark each suspicion as the game unfolds.</footer>
+
+<script>
+(function(){
+  const DATA = {
+    redkeep: {
+      label: "Red Keep",
+      who: ["Cersei","Tyrion","Jaime","Margaery","Petyr","Sansa"],
+      where: ["Small Council","Qyburn Lab","Tower Hand","Kingsguard","Cells","Gardens","Pavilion","Tommen Room","Pycelle Lab","Cersei Room","Sparring Yard"],
+      what: ["Poison","Axe","Arakh","Faceless Man","Crossbow","Dagger"]
+    },
+    meereen: {
+      label: "Meereen",
+      who: ["Daenerys","Daario","Grey Worm","Hizdahr","Missandei","Jorah"],
+      where: ["Great Pyramid","Slave Quarters","Brothel","Temple","Tunnels","Bazaar","Daznak Pit","City Gates","Catacombs","Masters Pyramid"],
+      what: ["Poison","Axe","Arakh","Faceless Man","Crossbow","Dagger"]
+    }
+  };
+
+  const STATES = ["", "check", "cross", "maybe"];
+  const GLYPHS = { "": "", check: "✓", cross: "✕", maybe: "?" };
+
+  const NUM_PLAYERS = 6;
+  const STORAGE_PREFIX = "gotCluedo_";
+  const PLAYERS_KEY = STORAGE_PREFIX + "players";
+  const VISIBLE_KEY = STORAGE_PREFIX + "boardVisible";
+  const ACTIVE_BOARD_KEY = STORAGE_PREFIX + "activeBoard";
+
+  let activeBoard = localStorage.getItem(ACTIVE_BOARD_KEY) || "redkeep";
+  let boardVisible = localStorage.getItem(VISIBLE_KEY) !== "false";
+
+  const ledgerTable = document.getElementById("ledgerTable");
+  const boardWrap = document.getElementById("boardWrap");
+  const hiddenMsg = document.getElementById("hiddenMsg");
+  const toggleBtn = document.getElementById("toggleBoard");
+  const resetBtn = document.getElementById("resetBoard");
+  const tabs = document.querySelectorAll(".tab");
+
+  // ---------- Players ----------
+  function loadPlayers(){
+    const saved = JSON.parse(localStorage.getItem(PLAYERS_KEY) || "[]");
+    const names = [];
+    for(let i=0;i<NUM_PLAYERS;i++){ names.push(saved[i] || ""); }
+    return names;
+  }
+
+  function savePlayerName(idx, value){
+    const names = loadPlayers();
+    names[idx] = value;
+    localStorage.setItem(PLAYERS_KEY, JSON.stringify(names));
+  }
+
+  // ---------- Marks storage ----------
+  function marksKey(boardId){ return STORAGE_PREFIX + "marks_" + boardId; }
+
+  function loadMarks(boardId){
+    return JSON.parse(localStorage.getItem(marksKey(boardId)) || "{}");
+  }
+
+  function saveMarks(boardId, marks){
+    localStorage.setItem(marksKey(boardId), JSON.stringify(marks));
+  }
+
+  function cellKey(category, item, playerIdx){
+    return category + "::" + item + "::" + playerIdx;
+  }
+
+  // ---------- Board rendering ----------
+  function renderBoard(boardId){
+    const board = DATA[boardId];
+    const marks = loadMarks(boardId);
+    ledgerTable.innerHTML = "";
+
+    // Column widths via colgroup so fixed table-layout respects them reliably
+    const colgroup = document.createElement("colgroup");
+    const labelCol = document.createElement("col");
+    labelCol.className = "col-label";
+    colgroup.appendChild(labelCol);
+    for(let p=0; p<NUM_PLAYERS; p++){
+      const col = document.createElement("col");
+      col.className = "col-player";
+      colgroup.appendChild(col);
+    }
+    ledgerTable.appendChild(colgroup);
+
+    // Player header row
+    const headerRow = document.createElement("tr");
+    headerRow.className = "player-header-row";
+    const corner = document.createElement("th");
+    corner.className = "corner-cell";
+    corner.textContent = board.label.toUpperCase();
+    headerRow.appendChild(corner);
+
+    const names = loadPlayers();
+    for(let p=0; p<NUM_PLAYERS; p++){
+      const th = document.createElement("th");
+      const input = document.createElement("input");
+      input.type = "text";
+      input.className = "player-input";
+      input.placeholder = "Player " + (p+1);
+      input.value = names[p] || "";
+      input.maxLength = 18;
+      input.dataset.playerIdx = p;
+      input.addEventListener("input", () => savePlayerName(p, input.value));
+      th.appendChild(input);
+      headerRow.appendChild(th);
+    }
+    ledgerTable.appendChild(headerRow);
+
+    const categories = [
+      { key: "who", label: "WHO", items: board.who },
+      { key: "where", label: "WHERE", items: board.where },
+      { key: "what", label: "WHAT", items: board.what }
+    ];
+
+    categories.forEach((cat, catIdx) => {
+      const catRow = document.createElement("tr");
+      catRow.className = "cat-row" + (catIdx > 0 ? " section-gap" : "");
+      const catTh = document.createElement("th");
+      catTh.className = "category-label";
+      catTh.colSpan = NUM_PLAYERS + 1;
+      catTh.textContent = cat.label;
+      catRow.appendChild(catTh);
+      ledgerTable.appendChild(catRow);
+
+      cat.items.forEach(item => {
+        const row = document.createElement("tr");
+        row.className = "item-row";
+        const itemTh = document.createElement("th");
+        itemTh.className = "item-label";
+        itemTh.textContent = item;
+        row.appendChild(itemTh);
+
+        for(let p=0; p<NUM_PLAYERS; p++){
+          const td = document.createElement("td");
+          const key = cellKey(cat.key, item, p);
+          const state = marks[key] || "";
+          td.className = "mark-cell" + (state ? " state-" + state : "");
+          td.dataset.key = key;
+          const span = document.createElement("span");
+          span.className = "glyph";
+          span.textContent = GLYPHS[state];
+          td.appendChild(span);
+
+          td.addEventListener("click", () => cycleMark(boardId, key, td));
+          row.appendChild(td);
+        }
+        ledgerTable.appendChild(row);
+      });
+    });
+  }
+
+  function cycleMark(boardId, key, td){
+    const marks = loadMarks(boardId);
+    const current = marks[key] || "";
+    const nextIdx = (STATES.indexOf(current) + 1) % STATES.length;
+    const next = STATES[nextIdx];
+
+    if(next === ""){ delete marks[key]; } else { marks[key] = next; }
+    saveMarks(boardId, marks);
+
+    td.className = "mark-cell" + (next ? " state-" + next : "");
+    const span = document.createElement("span");
+    span.className = "glyph";
+    span.textContent = GLYPHS[next];
+    td.innerHTML = "";
+    td.appendChild(span);
+  }
+
+  // ---------- Board mode switching ----------
+  function setActiveBoard(boardId){
+    activeBoard = boardId;
+    localStorage.setItem(ACTIVE_BOARD_KEY, boardId);
+    tabs.forEach(t => t.classList.toggle("active", t.dataset.board === boardId));
+    renderBoard(boardId);
+  }
+
+  tabs.forEach(tab => {
+    tab.addEventListener("click", () => setActiveBoard(tab.dataset.board));
+  });
+
+  // ---------- Hide/show ----------
+  function applyVisibility(){
+    if(boardVisible){
+      boardWrap.style.display = "";
+      hiddenMsg.style.display = "none";
+      toggleBtn.textContent = "Hide Board";
+    } else {
+      boardWrap.style.display = "none";
+      hiddenMsg.style.display = "";
+      toggleBtn.textContent = "Show Board";
+    }
+  }
+
+  toggleBtn.addEventListener("click", () => {
+    boardVisible = !boardVisible;
+    localStorage.setItem(VISIBLE_KEY, boardVisible ? "true" : "false");
+    applyVisibility();
+  });
+
+  // ---------- Reset ----------
+  const resetOverlay = document.getElementById("resetOverlay");
+  const resetText = document.getElementById("resetText");
+  const resetCancel = document.getElementById("resetCancel");
+  const resetConfirm = document.getElementById("resetConfirm");
+
+  function openResetModal(){
+    resetText.textContent = "Clear all marks on the " + DATA[activeBoard].label + " board?";
+    resetOverlay.classList.add("open");
+  }
+  function closeResetModal(){
+    resetOverlay.classList.remove("open");
+  }
+
+  resetBtn.addEventListener("click", openResetModal);
+  resetCancel.addEventListener("click", closeResetModal);
+  resetOverlay.addEventListener("click", (e) => {
+    if(e.target === resetOverlay) closeResetModal();
+  });
+  resetConfirm.addEventListener("click", () => {
+    localStorage.removeItem(marksKey(activeBoard));
+    renderBoard(activeBoard);
+    closeResetModal();
+  });
+
+  // ---------- Init ----------
+  setActiveBoard(activeBoard);
+  applyVisibility();
+})();
+</script>
+
+</body>
+</html>
