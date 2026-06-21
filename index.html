@@ -270,7 +270,8 @@
   table.ledger{
     width:100%;
     table-layout:fixed;
-    border-collapse:collapse;
+    border-collapse:separate;
+    border-spacing:0;
     background:
       repeating-linear-gradient(180deg, rgba(255,255,255,0.012) 0 1px, transparent 1px 30px),
       #181210;
@@ -280,7 +281,7 @@
   .col-player{ width:auto; }
 
   .ledger th, .ledger td{
-    border:1px solid #3a3026;
+    box-shadow: inset -1px -1px 0 0 #3a3026;
     padding:0;
     text-align:center;
   }
@@ -325,6 +326,60 @@
     background:linear-gradient(180deg, #241b14, #14100c);
     color:var(--gold-bright);
   }
+
+  /* ---------- Floating player header (JS-driven, scroll-synced) ---------- */
+  .floating-header{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    z-index:60;
+    display:none;
+    background:linear-gradient(180deg, #1c1410, #0e0a07);
+    border-bottom:2px solid var(--gold);
+    box-shadow:0 6px 18px rgba(0,0,0,0.55);
+  }
+  .floating-header.visible{ display:block; }
+  .floating-header-inner{
+    max-width:980px;
+    margin:0 auto;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  .floating-header table{
+    width:100%;
+    table-layout:fixed;
+    border-collapse:separate;
+    border-spacing:0;
+  }
+  .floating-header th{
+    font-family:'Cinzel', serif;
+    font-size:12px;
+    letter-spacing:1px;
+    color:var(--ink);
+    background:linear-gradient(180deg, var(--gold-bright), var(--gold));
+    padding:0;
+    text-align:center;
+  }
+  .floating-header th.corner-cell{
+    background:linear-gradient(180deg, var(--gold-bright), var(--gold));
+    color:var(--ink);
+    font-family:'Cinzel Decorative', serif;
+    font-weight:700;
+    font-size:13px;
+    letter-spacing:1.5px;
+    padding:10px 8px;
+  }
+  .floating-header .name-label{
+    display:block;
+    padding:10px 4px;
+    font-size:12px;
+    font-weight:700;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+
 
   .item-row th.item-label{
     font-family:'EB Garamond', serif;
@@ -453,7 +508,13 @@
   </div>
 </div>
 
-<div class="players-hint">Tap a name above each column to edit it</div>
+<div class="players-hint">"Knowledge is power." Mark each suspicion as the game unfolds.</div>
+
+<div class="floating-header" id="floatingHeader">
+  <div class="floating-header-inner">
+    <table id="floatingHeaderTable"></table>
+  </div>
+</div>
 
 <div id="boardWrap">
   <div class="board-frame">
@@ -466,7 +527,7 @@
   <div class="hidden-msg">— the ledger has been sealed —</div>
 </div>
 
-<footer>"Knowledge is power." Mark each suspicion as the game unfolds.</footer>
+<footer>For the game, for the throne.</footer>
 
 <script>
 (function(){
@@ -556,7 +617,7 @@
     headerRow.className = "player-header-row";
     const corner = document.createElement("th");
     corner.className = "corner-cell";
-    corner.textContent = board.label.toUpperCase();
+    corner.textContent = "";
     headerRow.appendChild(corner);
 
     const names = loadPlayers();
@@ -574,6 +635,7 @@
       headerRow.appendChild(th);
     }
     ledgerTable.appendChild(headerRow);
+    realHeaderRow = headerRow;
 
     const categories = [
       { key: "who", label: "WHO", items: board.who },
@@ -616,6 +678,8 @@
         ledgerTable.appendChild(row);
       });
     });
+
+    requestAnimationFrame(buildFloatingHeader);
   }
 
   function cycleMark(boardId, key, td){
@@ -664,6 +728,7 @@
     boardVisible = !boardVisible;
     localStorage.setItem(VISIBLE_KEY, boardVisible ? "true" : "false");
     applyVisibility();
+    updateFloatingHeaderVisibility();
   });
 
   // ---------- Reset ----------
@@ -689,6 +754,99 @@
     localStorage.removeItem(marksKey(activeBoard));
     renderBoard(activeBoard);
     closeResetModal();
+  });
+
+  // ---------- Floating header (scroll-synced) ----------
+  const floatingHeader = document.getElementById("floatingHeader");
+  const floatingHeaderTable = document.getElementById("floatingHeaderTable");
+  const boardFrame = document.querySelector(".board-frame");
+  let realHeaderRow = null;
+
+  function buildFloatingHeader(){
+    if(!realHeaderRow) return;
+    floatingHeaderTable.innerHTML = "";
+
+    const colgroup = document.createElement("colgroup");
+    const cells = realHeaderRow.querySelectorAll("th");
+    cells.forEach(cell => {
+      const col = document.createElement("col");
+      colgroup.appendChild(col);
+    });
+    floatingHeaderTable.appendChild(colgroup);
+
+    const row = document.createElement("tr");
+    cells.forEach(cell => {
+      const th = document.createElement("th");
+      if(cell.classList.contains("corner-cell")){
+        th.className = "corner-cell";
+        th.textContent = cell.textContent;
+      } else {
+        const input = cell.querySelector("input");
+        const span = document.createElement("span");
+        span.className = "name-label";
+        span.textContent = (input && input.value.trim()) ? input.value : input.placeholder;
+        th.appendChild(span);
+      }
+      row.appendChild(th);
+    });
+    floatingHeaderTable.appendChild(row);
+
+    syncFloatingHeaderWidths();
+  }
+
+  function syncFloatingHeaderWidths(){
+    if(!realHeaderRow) return;
+    const realCells = realHeaderRow.querySelectorAll("th");
+    const floatCols = floatingHeaderTable.querySelectorAll("col");
+    realCells.forEach((cell, i) => {
+      if(floatCols[i]){
+        floatCols[i].style.width = cell.getBoundingClientRect().width + "px";
+      }
+    });
+
+    // Match row height exactly to avoid visual size mismatch
+    const realRowHeight = realHeaderRow.getBoundingClientRect().height;
+    const floatRow = floatingHeaderTable.querySelector("tr");
+    if(floatRow){
+      floatRow.querySelectorAll("th").forEach(th => {
+        th.style.height = realRowHeight + "px";
+      });
+    }
+
+    // Match horizontal inset exactly to board-frame's own padding, rather than assuming a fixed value
+    const framePadding = parseFloat(getComputedStyle(boardFrame).paddingLeft) || 0;
+    floatingHeader.querySelector(".floating-header-inner").style.paddingLeft = framePadding + "px";
+    floatingHeader.querySelector(".floating-header-inner").style.paddingRight = framePadding + "px";
+  }
+
+  function syncFloatingHeaderScroll(){
+    floatingHeader.querySelector(".floating-header-inner").scrollLeft = boardFrame.scrollLeft;
+  }
+
+  function updateFloatingHeaderVisibility(){
+    if(!realHeaderRow || !boardVisible){
+      floatingHeader.classList.remove("visible");
+      return;
+    }
+    const rect = realHeaderRow.getBoundingClientRect();
+    if(rect.top < 0){
+      floatingHeader.classList.add("visible");
+      syncFloatingHeaderWidths();
+      syncFloatingHeaderScroll();
+    } else {
+      floatingHeader.classList.remove("visible");
+    }
+  }
+
+  window.addEventListener("scroll", updateFloatingHeaderVisibility, { passive:true });
+  window.addEventListener("resize", () => { syncFloatingHeaderWidths(); updateFloatingHeaderVisibility(); });
+  boardFrame.addEventListener("scroll", syncFloatingHeaderScroll, { passive:true });
+
+  // Keep floating header's displayed names live as the real inputs change
+  ledgerTable.addEventListener("input", (e) => {
+    if(e.target.classList.contains("player-input")){
+      buildFloatingHeader();
+    }
   });
 
   // ---------- Init ----------
