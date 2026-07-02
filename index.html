@@ -4,6 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cluedo: Game of Thrones — Detection Ledger</title>
+<script>
+  (function(){
+    try{
+      var savedHouse = localStorage.getItem("gotCluedo_house");
+      if(savedHouse && savedHouse !== "lannister"){
+        document.documentElement.setAttribute("data-house", savedHouse);
+      }
+    }catch(e){}
+  })();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Cinzel+Decorative:wght@700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=EB+Garamond:ital@0;1&display=swap" rel="stylesheet">
@@ -19,6 +29,160 @@
     --parchment-dim:#d8c9a8;
     --green:#1e3d2f;
     --line:#a98f5c;
+
+    /* surfaces */
+    --bg-radial:#1c1410;
+    --surface-1:#241b14;
+    --surface-2:#14100c;
+    --surface-3:#181210;
+    --surface-tab:#3a2f25;
+    --surface-tab-2:#241c16;
+    --surface-btn:#2a241d;
+    --surface-btn-2:#181410;
+    --surface-modal:#2b2118;
+    --surface-modal-2:#1a130d;
+    --surface-label:#221b15;
+    --row-divider:#3a3026;
+    --crown-color:#c9a86a;
+    --gold-dark:#a3823f;
+    --hover-glow:rgba(201,168,106,0.5);
+    --tab-active-glow:rgba(122,31,43,0.55);
+    --cell-hover:rgba(201,168,106,0.08);
+  }
+
+  /* ============ HOUSE THEMES ============ */
+  /* House Lannister is the default (defined in :root above) */
+
+  html[data-house="stark"]{
+    --ink:#080c10; --gold:#cfe3ee; --gold-bright:#ffffff;
+    --blood:#3d6a82; --blood-dark:#1f3d4d;
+    --wood-shadow:#16222b; --parchment:#eef4f7; --parchment-dim:#aac4d1;
+    --green:#3d6a82; --line:#5f8aa0;
+    --bg-radial:#0d161c; --surface-1:#141f27; --surface-2:#080e12; --surface-3:#0b1318;
+    --surface-tab:#1c2c36; --surface-tab-2:#101a21; --surface-btn:#152027; --surface-btn-2:#090f13;
+    --surface-modal:#162228; --surface-modal-2:#0a1115; --surface-label:#101a20; --row-divider:#26404d;
+    --crown-color:#cfe3ee; --gold-dark:#7fa8bc;
+    --hover-glow:rgba(207,227,238,0.55); --tab-active-glow:rgba(61,106,130,0.6); --cell-hover:rgba(207,227,238,0.1);
+  }
+
+  html[data-house="targaryen"]{
+    --ink:#070504; --gold:#e0512a; --gold-bright:#ff8a4d;
+    --blood:#8a0e16; --blood-dark:#3d0509;
+    --wood-shadow:#1c1110; --parchment:#f2e3d8; --parchment-dim:#cfa794;
+    --green:#7a1d10; --line:#8a3a28;
+    --bg-radial:#100a08; --surface-1:#1a0f0c; --surface-2:#0c0706; --surface-3:#100b09;
+    --surface-tab:#291612; --surface-tab-2:#170d0a; --surface-btn:#1d1210; --surface-btn-2:#0e0807;
+    --surface-modal:#1e1310; --surface-modal-2:#100a08; --surface-label:#150e0c; --row-divider:#34201a;
+    --crown-color:#e0512a; --gold-dark:#a83a1c;
+    --hover-glow:rgba(224,81,42,0.55); --tab-active-glow:rgba(138,14,22,0.6); --cell-hover:rgba(224,81,42,0.1);
+  }
+
+  html[data-house="baratheon"]{
+    --ink:#0a0905; --gold:#d4af37; --gold-bright:#f2d061;
+    --blood:#3a3225; --blood-dark:#1f1b13;
+    --wood-shadow:#221d12; --parchment:#f0e7cf; --parchment-dim:#d8c9a0;
+    --green:#3a3225; --line:#9c8540;
+    --bg-radial:#161208; --surface-1:#221c10; --surface-2:#110d06; --surface-3:#161108;
+    --surface-tab:#332811; --surface-tab-2:#1f1709; --surface-btn:#261f0f; --surface-btn-2:#130f06;
+    --surface-modal:#27200f; --surface-modal-2:#150f07; --surface-label:#1c1609; --row-divider:#3c321a;
+    --crown-color:#d4af37; --gold-dark:#a9883a;
+    --hover-glow:rgba(212,175,55,0.5); --tab-active-glow:rgba(58,50,37,0.6); --cell-hover:rgba(212,175,55,0.08);
+  }
+
+  html[data-house="tyrell"]{
+    --ink:#090c08; --gold:#d9b88a; --gold-bright:#f0dba8;
+    --blood:#3a6b3f; --blood-dark:#214223;
+    --wood-shadow:#1c2818; --parchment:#eef0e0; --parchment-dim:#cdd6ba;
+    --green:#3a6b3f; --line:#7a9a6a;
+    --bg-radial:#121810; --surface-1:#1a2415; --surface-2:#0d120a; --surface-3:#11160d;
+    --surface-tab:#243018; --surface-tab-2:#161e0e; --surface-btn:#1c2613; --surface-btn-2:#0f1409;
+    --surface-modal:#1c2715; --surface-modal-2:#10150a; --surface-label:#161e0f; --row-divider:#2e3c22;
+    --crown-color:#d9b88a; --gold-dark:#a98a55;
+    --hover-glow:rgba(217,184,138,0.5); --tab-active-glow:rgba(58,107,63,0.55); --cell-hover:rgba(217,184,138,0.08);
+  }
+
+  html[data-house="martell"]{
+    --ink:#0c0704; --gold:#e08830; --gold-bright:#f5ad5c;
+    --blood:#a8341f; --blood-dark:#641f12;
+    --wood-shadow:#2a1409; --parchment:#f5e6d3; --parchment-dim:#dcbb98;
+    --green:#7a3a1c; --line:#b06a30;
+    --bg-radial:#190d05; --surface-1:#261408; --surface-2:#120904; --surface-3:#170b05;
+    --surface-tab:#371c0a; --surface-tab-2:#221207; --surface-btn:#2a1507; --surface-btn-2:#150a04;
+    --surface-modal:#2b1608; --surface-modal-2:#160b05; --surface-label:#20110a; --row-divider:#432411;
+    --crown-color:#e08830; --gold-dark:#b06a25;
+    --hover-glow:rgba(224,136,48,0.5); --tab-active-glow:rgba(168,52,31,0.55); --cell-hover:rgba(224,136,48,0.08);
+  }
+
+  html[data-house="arryn"]{
+    --ink:#070b0d; --gold:#7fb8d9; --gold-bright:#bfe3f2;
+    --blood:#2c5a78; --blood-dark:#173a4f;
+    --wood-shadow:#142126; --parchment:#eaf3f5; --parchment-dim:#bcd8e0;
+    --green:#2c5a78; --line:#5e93ab;
+    --bg-radial:#0e161a; --surface-1:#16242a; --surface-2:#0a1114; --surface-3:#0e1619;
+    --surface-tab:#1d2f37; --surface-tab-2:#121d22; --surface-btn:#172329; --surface-btn-2:#0b1215;
+    --surface-modal:#172428; --surface-modal-2:#0c1417; --surface-label:#111c20; --row-divider:#27393f;
+    --crown-color:#7fb8d9; --gold-dark:#5b91aa;
+    --hover-glow:rgba(127,184,217,0.5); --tab-active-glow:rgba(44,90,120,0.55); --cell-hover:rgba(127,184,217,0.08);
+  }
+
+  html[data-house="tully"]{
+    --ink:#070a0d; --gold:#7a9bc4; --gold-bright:#a9c4e6;
+    --blood:#8c1f2b; --blood-dark:#591620;
+    --wood-shadow:#172230; --parchment:#e8edf2; --parchment-dim:#b9c8d8;
+    --green:#2f4f70; --line:#5f7fa3;
+    --bg-radial:#0e151c; --surface-1:#172230; --surface-2:#0a1015; --surface-3:#0e151c;
+    --surface-tab:#1e2d3f; --surface-tab-2:#131d28; --surface-btn:#18232f; --surface-btn-2:#0b1116;
+    --surface-modal:#1a2733; --surface-modal-2:#0e161c; --surface-label:#121c26; --row-divider:#283c4c;
+    --crown-color:#7a9bc4; --gold-dark:#5876a0;
+    --hover-glow:rgba(122,155,196,0.5); --tab-active-glow:rgba(140,31,43,0.55); --cell-hover:rgba(122,155,196,0.08);
+  }
+
+  html[data-house="greyjoy"]{
+    --ink:#08090a; --gold:#a8a596; --gold-bright:#d4d0bd;
+    --blood:#3a3a3a; --blood-dark:#1f1f1f;
+    --wood-shadow:#1c1d1e; --parchment:#e6e4da; --parchment-dim:#bdbaab;
+    --green:#3a3a3a; --line:#74716a;
+    --bg-radial:#121314; --surface-1:#1b1c1d; --surface-2:#0c0d0d; --surface-3:#101111;
+    --surface-tab:#2a2b2b; --surface-tab-2:#1a1b1b; --surface-btn:#1f2020; --surface-btn-2:#0f1010;
+    --surface-modal:#212222; --surface-modal-2:#131414; --surface-label:#181919; --row-divider:#363635;
+    --crown-color:#a8a596; --gold-dark:#827f70;
+    --hover-glow:rgba(168,165,150,0.45); --tab-active-glow:rgba(58,58,58,0.6); --cell-hover:rgba(168,165,150,0.07);
+  }
+
+  html[data-house="bolton"]{
+    --ink:#0a0807; --gold:#c4b8ad; --gold-bright:#e6d8cc;
+    --blood:#7a1018; --blood-dark:#45070c;
+    --wood-shadow:#241917; --parchment:#ece4dd; --parchment-dim:#c9b8ad;
+    --green:#5a1218; --line:#8a7468;
+    --bg-radial:#140f0d; --surface-1:#211613; --surface-2:#0f0a08; --surface-3:#150f0d;
+    --surface-tab:#2f1f1b; --surface-tab-2:#1d1310; --surface-btn:#241814; --surface-btn-2:#120c0a;
+    --surface-modal:#251a16; --surface-modal-2:#140e0c; --surface-label:#1b120f; --row-divider:#3a2a24;
+    --crown-color:#c4b8ad; --gold-dark:#9a8a7d;
+    --hover-glow:rgba(196,184,173,0.45); --tab-active-glow:rgba(122,16,24,0.6); --cell-hover:rgba(196,184,173,0.07);
+  }
+
+  html[data-house="hightower"]{
+    --ink:#070a0c; --gold:#9fc9d9; --gold-bright:#d3eef5;
+    --blood:#33586b; --blood-dark:#1c343f;
+    --wood-shadow:#18242a; --parchment:#e9f1f4; --parchment-dim:#bcd4dc;
+    --green:#33586b; --line:#638fa1;
+    --bg-radial:#0e171c; --surface-1:#172429; --surface-2:#0a1114; --surface-3:#0e161a;
+    --surface-tab:#1f3038; --surface-tab-2:#131f24; --surface-btn:#18262b; --surface-btn-2:#0b1316;
+    --surface-modal:#19272c; --surface-modal-2:#0d1518; --surface-label:#121d21; --row-divider:#283b41;
+    --crown-color:#9fc9d9; --gold-dark:#74a3b3;
+    --hover-glow:rgba(159,201,217,0.5); --tab-active-glow:rgba(51,88,107,0.55); --cell-hover:rgba(159,201,217,0.08);
+  }
+
+  html[data-house="karstark"]{
+    --ink:#090a0b; --gold:#b9c2c9; --gold-bright:#e4eaee;
+    --blood:#4a5560; --blood-dark:#2b333a;
+    --wood-shadow:#1d2227; --parchment:#eceef0; --parchment-dim:#c2cad0;
+    --green:#4a5560; --line:#7c8993;
+    --bg-radial:#101315; --surface-1:#1a1f23; --surface-2:#0c0e10; --surface-3:#101315;
+    --surface-tab:#262d32; --surface-tab-2:#171c20; --surface-btn:#1e2326; --surface-btn-2:#0e1112;
+    --surface-modal:#1f2529; --surface-modal-2:#111517; --surface-label:#161a1d; --row-divider:#323a40;
+    --crown-color:#b9c2c9; --gold-dark:#8f9aa3;
+    --hover-glow:rgba(185,194,201,0.45); --tab-active-glow:rgba(74,85,96,0.55); --cell-hover:rgba(185,194,201,0.07);
   }
 
   html{
@@ -33,12 +197,13 @@
     margin:0;
     min-height:100vh;
     background:
-      radial-gradient(ellipse at top, #1c1410 0%, var(--ink) 55%),
+      radial-gradient(ellipse at top, var(--bg-radial) 0%, var(--ink) 55%),
       repeating-linear-gradient(90deg, rgba(0,0,0,0.15) 0 2px, transparent 2px 40px);
     background-attachment:fixed;
     font-family:'Crimson Text', serif;
     color:var(--parchment);
     padding:28px 16px 80px;
+    transition:background-color .3s ease;
   }
 
   /* ---------- Header ---------- */
@@ -47,6 +212,7 @@
     margin-bottom:6px;
   }
   .crown svg{ width:46px; height:46px; opacity:0.85; }
+  .crown svg path, .crown svg circle{ stroke:var(--crown-color) !important; fill:var(--crown-color) !important; }
 
   h1{
     font-family:'Cinzel Decorative', serif;
@@ -88,7 +254,56 @@
     opacity:0.9;
   }
 
-  /* ---------- Controls bar ---------- */
+  /* ---------- House theme selector ---------- */
+  .house-select-wrap{
+    max-width:980px;
+    margin:0 auto 18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .house-select-label{
+    font-family:'Cinzel', serif;
+    font-size:11px;
+    letter-spacing:2.5px;
+    text-transform:uppercase;
+    color:var(--gold);
+    opacity:0.85;
+  }
+  .house-select{
+    font-family:'Cinzel', serif;
+    font-weight:700;
+    font-size:13px;
+    letter-spacing:0.8px;
+    color:var(--gold-bright);
+    background:linear-gradient(180deg, var(--surface-btn), var(--surface-btn-2));
+    border:1px solid var(--gold);
+    border-radius:3px;
+    padding:9px 34px 9px 14px;
+    cursor:pointer;
+    outline:none;
+    appearance:none;
+    -webkit-appearance:none;
+    -moz-appearance:none;
+    background-image:linear-gradient(180deg, var(--surface-btn), var(--surface-btn-2)),
+      linear-gradient(45deg, transparent 50%, var(--gold) 50%),
+      linear-gradient(135deg, var(--gold) 50%, transparent 50%);
+    background-position:0 0, calc(100% - 18px) center, calc(100% - 13px) center;
+    background-size:100% 100%, 6px 6px, 6px 6px;
+    background-repeat:no-repeat;
+    transition:all .2s ease;
+  }
+  .house-select:hover, .house-select:focus{
+    box-shadow:0 0 12px var(--hover-glow);
+    border-color:var(--gold-bright);
+  }
+  .house-select option{
+    background:var(--surface-btn-2);
+    color:var(--parchment);
+    font-family:'Cinzel', serif;
+  }
   .controls{
     max-width:980px;
     margin:0 auto 22px;
@@ -110,7 +325,7 @@
     letter-spacing:1.5px;
     text-transform:uppercase;
     padding:10px 22px;
-    background:linear-gradient(180deg, #3a2f25, #241c16);
+    background:linear-gradient(180deg, var(--surface-tab), var(--surface-tab-2));
     border:1px solid var(--line);
     color:var(--parchment-dim);
     cursor:pointer;
@@ -123,7 +338,7 @@
     background:linear-gradient(180deg, var(--blood), var(--blood-dark));
     color:var(--gold-bright);
     border-color:var(--gold);
-    box-shadow:0 0 18px rgba(122,31,43,0.55), inset 0 0 14px rgba(0,0,0,0.4);
+    box-shadow:0 0 18px var(--tab-active-glow), inset 0 0 14px rgba(0,0,0,0.4);
   }
 
   .right-controls{
@@ -138,7 +353,7 @@
     letter-spacing:1.2px;
     text-transform:uppercase;
     padding:10px 18px;
-    background:linear-gradient(180deg, #2a241d, #181410);
+    background:linear-gradient(180deg, var(--surface-btn), var(--surface-btn-2));
     border:1px solid var(--gold);
     color:var(--gold-bright);
     cursor:pointer;
@@ -146,9 +361,9 @@
     transition:all .2s ease;
   }
   .btn:hover{
-    background:linear-gradient(180deg, var(--gold), #a3823f);
-    color:#1a1410;
-    box-shadow:0 0 14px rgba(201,168,106,0.5);
+    background:linear-gradient(180deg, var(--gold), var(--gold-dark));
+    color:var(--ink);
+    box-shadow:0 0 14px var(--hover-glow);
   }
   .btn:active{ transform:translateY(1px); }
   .btn.danger{ border-color:var(--blood); color:#e3a3ab; }
@@ -168,7 +383,7 @@
   .modal-overlay.open{ display:flex; }
   .modal-box{
     background:
-      linear-gradient(180deg, #2b2118, #1a130d);
+      linear-gradient(180deg, var(--surface-modal), var(--surface-modal-2));
     border:1px solid var(--gold);
     box-shadow:0 0 0 1px rgba(0,0,0,0.6), 0 20px 60px rgba(0,0,0,0.8), 0 0 30px rgba(122,31,43,0.25);
     padding:28px 26px 24px;
@@ -227,15 +442,42 @@
     border:none;
     border-bottom:2px solid rgba(10,9,8,0.45);
     color:var(--ink);
-    padding:10px 4px;
+    padding:10px 22px 10px 4px;
     outline:none;
     transition:background .2s;
+    text-overflow:ellipsis;
+    overflow:hidden;
   }
   .player-input::placeholder{ color:rgba(10,9,8,0.45); }
   .player-input:focus{
     background:rgba(255,255,255,0.25);
     border-bottom-color:var(--blood);
   }
+  .name-cell-wrap{
+    position:relative;
+    display:flex;
+    align-items:center;
+  }
+  .name-clear-btn{
+    position:absolute;
+    right:2px;
+    top:50%;
+    transform:translateY(-50%);
+    width:16px;
+    height:16px;
+    border:none;
+    background:rgba(10,9,8,0.25);
+    color:var(--ink);
+    font-size:10px;
+    line-height:16px;
+    text-align:center;
+    border-radius:50%;
+    cursor:pointer;
+    display:none;
+    padding:0;
+  }
+  .name-clear-btn:hover{ background:var(--blood); color:var(--parchment); }
+  .name-cell-wrap.has-value .name-clear-btn{ display:block; }
 
   /* ---------- Board wrapper ---------- */
   #boardWrap{
@@ -274,20 +516,20 @@
     border-spacing:0;
     background:
       repeating-linear-gradient(180deg, rgba(255,255,255,0.012) 0 1px, transparent 1px 30px),
-      #181210;
+      var(--surface-3);
   }
 
   .col-label{ width:170px; }
   .col-player{ width:auto; }
 
   .ledger th, .ledger td{
-    box-shadow: inset -1px -1px 0 0 #3a3026;
+    box-shadow: inset -1px -1px 0 0 var(--row-divider);
     padding:0;
     text-align:center;
   }
 
   .corner-cell{
-    background:linear-gradient(180deg, #241b14, #14100c);
+    background:linear-gradient(180deg, var(--surface-1), var(--surface-2));
     position:sticky;
     left:0;
     z-index:3;
@@ -323,7 +565,7 @@
     padding:0;
   }
   .player-header-row th.corner-cell{
-    background:linear-gradient(180deg, #241b14, #14100c);
+    background:linear-gradient(180deg, var(--surface-1), var(--surface-2));
     color:var(--gold-bright);
   }
 
@@ -335,7 +577,7 @@
     right:0;
     z-index:60;
     display:none;
-    background:linear-gradient(180deg, #1c1410, #0e0a07);
+    background:linear-gradient(180deg, var(--surface-1), var(--surface-2));
     border-bottom:2px solid var(--gold);
     box-shadow:0 6px 18px rgba(0,0,0,0.55);
   }
@@ -380,7 +622,6 @@
     white-space:nowrap;
   }
 
-
   .item-row th.item-label{
     font-family:'EB Garamond', serif;
     font-style:italic;
@@ -388,7 +629,7 @@
     text-align:left;
     padding:9px 14px;
     color:var(--parchment);
-    background:#221b15;
+    background:var(--surface-label);
     white-space:nowrap;
     position:sticky;
     left:0;
@@ -404,7 +645,7 @@
     position:relative;
     transition:background .15s;
   }
-  .mark-cell:hover{ background:rgba(201,168,106,0.08); }
+  .mark-cell:hover{ background:var(--cell-hover, rgba(201,168,106,0.08)); }
   .mark-cell .glyph{
     font-size:22px;
     line-height:1;
@@ -455,7 +696,8 @@
     .mark-cell{ height:42px; }
     .mark-cell .glyph{ font-size:18px; }
     .item-row th.item-label{ font-size:12.5px; padding:7px 4px; white-space:normal; line-height:1.15; word-break:break-word; }
-    .player-input{ font-size:10px; padding:7px 1px; letter-spacing:0; }
+    .player-input{ font-size:10px; padding:7px 16px 7px 1px; letter-spacing:0; }
+    .name-clear-btn{ width:13px; height:13px; font-size:8px; line-height:13px; right:1px; }
     .scroll-hint{ display:none; }
   }
 
@@ -465,7 +707,8 @@
     .mark-cell{ height:40px; }
     .mark-cell .glyph{ font-size:16px; }
     .item-row th.item-label{ font-size:11.5px; padding:6px 3px; }
-    .player-input{ font-size:9px; padding:6px 1px; }
+    .player-input{ font-size:9px; padding:6px 14px 6px 1px; }
+    .name-clear-btn{ width:11px; height:11px; font-size:7px; line-height:11px; }
   }
 </style>
 </head>
@@ -484,6 +727,33 @@
 <div class="subtitle">A Game of Thrones — Cluedo Tracker</div>
 
 <div class="divider"><div class="line"></div><div class="sigil">⚔</div><div class="line"></div></div>
+
+<div class="house-select-wrap">
+  <label for="houseSelect" class="house-select-label">House Sigil</label>
+  <select id="houseSelect" class="house-select">
+    <option value="lannister">House Lannister</option>
+    <option value="stark">House Stark</option>
+    <option value="targaryen">House Targaryen</option>
+    <option value="baratheon">House Baratheon</option>
+    <option value="tyrell">House Tyrell</option>
+    <option value="martell">House Martell</option>
+    <option value="arryn">House Arryn</option>
+    <option value="tully">House Tully</option>
+    <option value="greyjoy">House Greyjoy</option>
+    <option value="bolton">House Bolton</option>
+    <option value="hightower">House Hightower</option>
+    <option value="karstark">House Karstark</option>
+  </select>
+
+  <label for="playerCountSelect" class="house-select-label">Players</label>
+  <select id="playerCountSelect" class="house-select">
+    <option value="2">2</option>
+    <option value="3">3</option>
+    <option value="4">4</option>
+    <option value="5">5</option>
+    <option value="6">6</option>
+  </select>
+</div>
 
 <div class="controls">
   <div class="tabs">
@@ -549,14 +819,21 @@
   const STATES = ["", "check", "cross", "maybe"];
   const GLYPHS = { "": "", check: "✓", cross: "✕", maybe: "?" };
 
-  const NUM_PLAYERS = 6;
+  const MIN_PLAYERS = 2;
+  const MAX_PLAYERS = 6;
   const STORAGE_PREFIX = "gotCluedo_";
   const PLAYERS_KEY = STORAGE_PREFIX + "players";
   const VISIBLE_KEY = STORAGE_PREFIX + "boardVisible";
   const ACTIVE_BOARD_KEY = STORAGE_PREFIX + "activeBoard";
+  const HOUSE_KEY = STORAGE_PREFIX + "house";
+  const PLAYER_COUNT_KEY = STORAGE_PREFIX + "playerCount";
 
   let activeBoard = localStorage.getItem(ACTIVE_BOARD_KEY) || "redkeep";
   let boardVisible = localStorage.getItem(VISIBLE_KEY) !== "false";
+  let activeHouse = localStorage.getItem(HOUSE_KEY) || "lannister";
+
+  const storedCount = parseInt(localStorage.getItem(PLAYER_COUNT_KEY), 10);
+  let NUM_PLAYERS = (storedCount >= MIN_PLAYERS && storedCount <= MAX_PLAYERS) ? storedCount : MAX_PLAYERS;
 
   const ledgerTable = document.getElementById("ledgerTable");
   const boardWrap = document.getElementById("boardWrap");
@@ -564,6 +841,34 @@
   const toggleBtn = document.getElementById("toggleBoard");
   const resetBtn = document.getElementById("resetBoard");
   const tabs = document.querySelectorAll(".tab");
+  const houseSelect = document.getElementById("houseSelect");
+  const playerCountSelect = document.getElementById("playerCountSelect");
+
+  // ---------- House theme ----------
+  function applyHouse(houseId){
+    activeHouse = houseId;
+    if(houseId === "lannister"){
+      document.documentElement.removeAttribute("data-house");
+    } else {
+      document.documentElement.setAttribute("data-house", houseId);
+    }
+    localStorage.setItem(HOUSE_KEY, houseId);
+  }
+
+  houseSelect.value = activeHouse;
+  houseSelect.addEventListener("change", () => applyHouse(houseSelect.value));
+
+  // ---------- Player count ----------
+  function applyPlayerCount(count){
+    NUM_PLAYERS = count;
+    localStorage.setItem(PLAYER_COUNT_KEY, String(count));
+    renderBoard(activeBoard);
+  }
+
+  playerCountSelect.value = String(NUM_PLAYERS);
+  playerCountSelect.addEventListener("change", () => {
+    applyPlayerCount(parseInt(playerCountSelect.value, 10));
+  });
 
   // ---------- Players ----------
   function loadPlayers(){
@@ -577,6 +882,45 @@
     const names = loadPlayers();
     names[idx] = value;
     localStorage.setItem(PLAYERS_KEY, JSON.stringify(names));
+  }
+
+  function buildNameCell(playerIdx, value){
+    const wrap = document.createElement("div");
+    wrap.className = "name-cell-wrap" + (value ? " has-value" : "");
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = "player-input";
+    input.placeholder = "Player " + (playerIdx+1);
+    input.value = value;
+    input.maxLength = 18;
+    input.dataset.playerIdx = playerIdx;
+    if(value) input.title = value;
+
+    const clearBtn = document.createElement("button");
+    clearBtn.type = "button";
+    clearBtn.className = "name-clear-btn";
+    clearBtn.textContent = "✕";
+    clearBtn.setAttribute("aria-label", "Clear name");
+
+    input.addEventListener("input", () => {
+      savePlayerName(playerIdx, input.value);
+      wrap.classList.toggle("has-value", !!input.value);
+      input.title = input.value;
+    });
+
+    clearBtn.addEventListener("click", () => {
+      input.value = "";
+      savePlayerName(playerIdx, "");
+      wrap.classList.remove("has-value");
+      input.title = "";
+      input.focus();
+      buildFloatingHeader();
+    });
+
+    wrap.appendChild(input);
+    wrap.appendChild(clearBtn);
+    return wrap;
   }
 
   // ---------- Marks storage ----------
@@ -623,15 +967,7 @@
     const names = loadPlayers();
     for(let p=0; p<NUM_PLAYERS; p++){
       const th = document.createElement("th");
-      const input = document.createElement("input");
-      input.type = "text";
-      input.className = "player-input";
-      input.placeholder = "Player " + (p+1);
-      input.value = names[p] || "";
-      input.maxLength = 18;
-      input.dataset.playerIdx = p;
-      input.addEventListener("input", () => savePlayerName(p, input.value));
-      th.appendChild(input);
+      th.appendChild(buildNameCell(p, names[p] || ""));
       headerRow.appendChild(th);
     }
     ledgerTable.appendChild(headerRow);
@@ -843,13 +1179,19 @@
   boardFrame.addEventListener("scroll", syncFloatingHeaderScroll, { passive:true });
 
   // Keep floating header's displayed names live as the real inputs change
+  let floatingHeaderRebuildScheduled = false;
   ledgerTable.addEventListener("input", (e) => {
-    if(e.target.classList.contains("player-input")){
-      buildFloatingHeader();
+    if(e.target.classList.contains("player-input") && !floatingHeaderRebuildScheduled){
+      floatingHeaderRebuildScheduled = true;
+      requestAnimationFrame(() => {
+        buildFloatingHeader();
+        floatingHeaderRebuildScheduled = false;
+      });
     }
   });
 
   // ---------- Init ----------
+  applyHouse(activeHouse);
   setActiveBoard(activeBoard);
   applyVisibility();
 })();
